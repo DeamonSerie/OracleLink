@@ -1,0 +1,36 @@
+[package]
+name = "pallet-oracle-ledger"
+version = "0.1.0"
+description = "OracleLink append-only oracle ledger pallet"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+frame-support = { workspace = true }
+frame-system = { workspace = true }
+sp-runtime = { workspace = true }
+sp-io = { workspace = true }
+sp-std = { version = "14.0.0", default-features = false }
+pallet-oracle-registry = { workspace = true }
+
+[dev-dependencies]
+sp-core = { workspace = true, features = ["std"] }
+pallet-balances = { workspace = true, features = ["std"] }
+
+[features]
+default = ["std"]
+std = [
+  "codec/std",
+  "scale-info/std",
+  "frame-support/std",
+  "frame-system/std",
+  "sp-runtime/std",
+  "sp-io/std",
+  "sp-std/std",
+  "pallet-oracle-registry/std",
+]
+try-runtime = ["frame-support/try-runtime", "frame-system/try-runtime", "pallet-oracle-registry/try-runtime"]
