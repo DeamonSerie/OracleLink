@@ -28,6 +28,7 @@ pallet-grandpa.workspace = true
 pallet-occ.workspace = true
 pallet-oracle-registry.workspace = true
 pallet-oracle-ledger.workspace = true
+pallet-asset-weight.workspace = true
 pallet-collective.workspace = true
 pallet-democracy.workspace = true
 pallet-preimage.workspace = true
@@ -74,6 +75,7 @@ std = [
 	"pallet-occ/std",
 	"pallet-oracle-registry/std",
 	"pallet-oracle-ledger/std",
+	"pallet-asset-weight/std",
 	"pallet-collective/std",
 	"pallet-democracy/std",
 	"pallet-preimage/std",
@@ -129,6 +131,7 @@ try-runtime = [
 	"pallet-occ/try-runtime",
 	"pallet-oracle-registry/try-runtime",
 	"pallet-oracle-ledger/try-runtime",
+	"pallet-asset-weight/try-runtime",
 	"pallet-collective/try-runtime",
 	"pallet-democracy/try-runtime",
 	"pallet-preimage/try-runtime",

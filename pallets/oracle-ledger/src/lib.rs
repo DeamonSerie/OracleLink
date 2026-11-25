@@ -8,7 +8,7 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     use pallet_oracle_registry::{self as registry, OracleId};
     use sp_io::hashing::blake2_256;
-    use sp_runtime::traits::Verify;
+    use sp_runtime::traits::{IdentifyAccount, Verify};
     use sp_runtime::{MultiSignature, RuntimeDebug};
     use sp_std::vec::Vec;
 
@@ -16,7 +16,7 @@ pub mod pallet {
     pub type EntryId = u64;
 
     #[derive(
-        Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen, Default,
+        Clone, Encode, Decode, DecodeWithMemTracking, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen, Default,
     )]
     pub enum VerificationOutcome {
         #[default]
@@ -26,7 +26,7 @@ pub mod pallet {
         Supersedes,
     }
 
-    #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+    #[derive(Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
     #[scale_info(skip_type_params(T))]
     pub struct ExternalTxRef<T: Config> {
         pub source_chain_id: ChainId,
@@ -34,13 +34,31 @@ pub mod pallet {
         pub block_ref: BoundedVec<u8, T::MaxTxRefLen>,
     }
 
+    impl<T: Config> Clone for ExternalTxRef<T> {
+        fn clone(&self) -> Self {
+            Self {
+                source_chain_id: self.source_chain_id,
+                tx_hash: self.tx_hash.clone(),
+                block_ref: self.block_ref.clone(),
+            }
+        }
+    }
+    impl<T: Config> PartialEq for ExternalTxRef<T> {
+        fn eq(&self, other: &Self) -> bool {
+            self.source_chain_id == other.source_chain_id
+                && self.tx_hash == other.tx_hash
+                && self.block_ref == other.block_ref
+        }
+    }
+    impl<T: Config> Eq for ExternalTxRef<T> {}
+
     #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
     pub struct LinkedOracleLinkTx {
         pub block_number: u64,
         pub extrinsic_index: u32,
     }
 
-    #[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+    #[derive(Encode, Decode, RuntimeDebug, TypeInfo, MaxEncodedLen)]
     #[scale_info(skip_type_params(T))]
     pub struct LedgerEntry<T: Config> {
         pub entry_id: EntryId,
@@ -57,6 +75,44 @@ pub mod pallet {
         pub entry_hash: [u8; 32],
         pub accumulator_root: [u8; 32],
     }
+
+    impl<T: Config> Clone for LedgerEntry<T> {
+        fn clone(&self) -> Self {
+            Self {
+                entry_id: self.entry_id,
+                oracle_id: self.oracle_id,
+                source_chain_id: self.source_chain_id,
+                domain_key: self.domain_key.clone(),
+                payload_hash: self.payload_hash,
+                payload: self.payload.clone(),
+                outcome: self.outcome.clone(),
+                linked_oraclelink_tx: self.linked_oraclelink_tx.clone(),
+                linked_external_txs: self.linked_external_txs.clone(),
+                submitted_by: self.submitted_by.clone(),
+                block_number: self.block_number,
+                entry_hash: self.entry_hash,
+                accumulator_root: self.accumulator_root,
+            }
+        }
+    }
+    impl<T: Config> PartialEq for LedgerEntry<T> {
+        fn eq(&self, other: &Self) -> bool {
+            self.entry_id == other.entry_id
+                && self.oracle_id == other.oracle_id
+                && self.source_chain_id == other.source_chain_id
+                && self.domain_key == other.domain_key
+                && self.payload_hash == other.payload_hash
+                && self.payload == other.payload
+                && self.outcome == other.outcome
+                && self.linked_oraclelink_tx == other.linked_oraclelink_tx
+                && self.linked_external_txs == other.linked_external_txs
+                && self.submitted_by == other.submitted_by
+                && self.block_number == other.block_number
+                && self.entry_hash == other.entry_hash
+                && self.accumulator_root == other.accumulator_root
+        }
+    }
+    impl<T: Config> Eq for LedgerEntry<T> {}
 
     #[pallet::config]
     pub trait Config: frame_system::Config + registry::Config {
@@ -328,7 +384,7 @@ pub mod pallet {
                         return (VerificationOutcome::ConflictDetected, Some(last_id));
                     }
                 }
-                (VerificationOutcome::HistoryCheckFailed, None)
+                (VerificationOutcome::ConflictDetected, Some(last_id))
             } else {
                 (VerificationOutcome::New, None)
             }

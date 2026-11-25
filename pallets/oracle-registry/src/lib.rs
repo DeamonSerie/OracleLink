@@ -59,15 +59,16 @@ pub mod pallet {
     #[pallet::getter(fn oracles)]
     pub type Oracles<T: Config> = StorageMap<_, Blake2_128Concat, OracleId, OracleConfig<T>>;
 
-    #[pallet::storage]
-    #[pallet::getter(fn signers)]
-    pub type AuthorizedSigners<T: Config> = StorageMap<
-        _,
-        Blake2_128Concat,
-        OracleId,
-        BoundedVec<sp_runtime::MultiSigner, T::MaxSigners>,
-        ValueQuery,
-    >;
+	#[pallet::storage]
+	#[pallet::unbounded]
+	#[pallet::getter(fn signers)]
+	pub type AuthorizedSigners<T: Config> = StorageMap<
+		_,
+		Blake2_128Concat,
+		OracleId,
+		BoundedVec<sp_runtime::MultiSigner, T::MaxSigners>,
+		ValueQuery,
+	>;
 
     #[pallet::storage]
     pub type OracleByChainName<T: Config> =

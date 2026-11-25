@@ -11,6 +11,7 @@ members = [
     "pallets/occ",
     "pallets/oracle-registry",
     "pallets/oracle-ledger",
+    "pallets/pallet-asset-weight",
     "runtime",
 ]
 resolver = "2"
@@ -20,6 +21,7 @@ oraclelink-runtime = { path = "runtime", default-features = false }
 pallet-oracle-registry = { path = "pallets/oracle-registry", default-features = false }
 pallet-occ = { path = "pallets/occ", default-features = false }
 pallet-oracle-ledger = { path = "pallets/oracle-ledger", default-features = false }
+pallet-asset-weight = { path = "pallets/pallet-asset-weight", default-features = false }
 clap = { version = "4.5.13" }
 frame-benchmarking-cli = { version = "47.0.0", default-features = false }
 frame-metadata-hash-extension = { version = "0.8.0", default-features = false }
@@ -90,3 +92,5 @@ codegen-units = 1
 inherits = "release"
 lto = true
 
+
+# append - handled manually below

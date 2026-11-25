@@ -354,6 +354,61 @@ impl pallet_oracle_ledger::Config for Runtime {
     type MaxSignatures = MaxLedgerSignatures;
 }
 
+parameter_types! {
+	pub const MaxAssets: u32 = 1024;
+	pub const BandSize: u128 = 1_000_000_000;
+	pub const DissimilarityScale: u128 = 1_000_000_000_000; // 1e12 weight-unit distance
+	pub const CrossInfluencePpb: u128 = 100_000_000; // 10% of scaled delta
+	pub const SelfInfluencePpb: u128 = 100_000_000; // 10% of scaled delta
+	pub const MaxBunchAbsorptionPerUpdate: u128 = 1_000_000_000_000_000;
+	pub const MaxTotalCrossPriceDeltaPerUpdate: u128 = 4_000_000_000_000_000;
+	pub const MaxCrossPriceDeltaPerUpdate: u128 = 1_000_000_000_000_000;
+	pub const MaxSelfPriceDeltaPerUpdate: u128 = 1_000_000_000_000_000;
+	pub const MinEffectivePrice: u128 = 1;
+	pub const MaxEffectivePrice: u128 = u128::MAX;
+	pub const MaxWeightMagnitude: u128 = 1_000_000_000_000_000_000;
+	pub const MinUnitCap: i128 = 1;
+	pub const MaxUnitCap: i128 = 1_000_000_000_000_000;
+	pub const DefaultUnitCap: i128 = 1_000_000;
+	pub const MaxUnitSlopePpm: i128 = 1_000_000_000;
+	pub const UnitDistWeightPpb: u128 = 0; // inert until distribution params are explicitly enabled
+	pub const UnitCapSelfPpb: u128 = 100_000_000;
+	pub const UnitCapInboundPpb: u128 = 50_000_000;
+	pub const UnitCapOutboundPpb: u128 = 50_000_000;
+	pub const MaxDistributionAggregate: i128 = 1_000_000_000_000_000_000;
+}
+
+impl pallet_asset_weight::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type AdminOrigin = EitherOfDiverse<
+		frame_system::EnsureRoot<AccountId>,
+		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>,
+	>;
+	type ContractInspector = ();
+	type OraclePrices = pallet_asset_weight::RegistryLedgerOraclePriceProvider<Runtime>;
+	type MaxAssets = MaxAssets;
+	type BandSize = BandSize;
+	type DissimilarityScale = DissimilarityScale;
+	type CrossInfluencePpb = CrossInfluencePpb;
+	type SelfInfluencePpb = SelfInfluencePpb;
+	type MaxBunchAbsorptionPerUpdate = MaxBunchAbsorptionPerUpdate;
+	type MaxTotalCrossPriceDeltaPerUpdate = MaxTotalCrossPriceDeltaPerUpdate;
+	type MaxCrossPriceDeltaPerUpdate = MaxCrossPriceDeltaPerUpdate;
+	type MaxSelfPriceDeltaPerUpdate = MaxSelfPriceDeltaPerUpdate;
+	type MinEffectivePrice = MinEffectivePrice;
+	type MaxEffectivePrice = MaxEffectivePrice;
+	type MaxWeightMagnitude = MaxWeightMagnitude;
+	type MinUnitCap = MinUnitCap;
+	type MaxUnitCap = MaxUnitCap;
+	type DefaultUnitCap = DefaultUnitCap;
+	type MaxUnitSlopePpm = MaxUnitSlopePpm;
+	type UnitDistWeightPpb = UnitDistWeightPpb;
+	type UnitCapSelfPpb = UnitCapSelfPpb;
+	type UnitCapInboundPpb = UnitCapInboundPpb;
+	type UnitCapOutboundPpb = UnitCapOutboundPpb;
+	type MaxDistributionAggregate = MaxDistributionAggregate;
+}
+
 pub type SignedExtra = (
     frame_system::CheckNonZeroSender<Runtime>,
     frame_system::CheckSpecVersion<Runtime>,
@@ -421,8 +476,10 @@ mod runtime {
     pub type Utility = pallet_utility;
     #[runtime::pallet_index(12)]
     pub type OracleRegistry = pallet_oracle_registry;
-    #[runtime::pallet_index(13)]
-    pub type OracleLedger = pallet_oracle_ledger;
+	#[runtime::pallet_index(13)]
+	pub type OracleLedger = pallet_oracle_ledger;
+	#[runtime::pallet_index(14)]
+	pub type AssetWeight = pallet_asset_weight;
 }
 
 #[cfg(feature = "std")]
